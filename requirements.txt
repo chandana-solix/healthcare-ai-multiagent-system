@@ -10,11 +10,18 @@ numpy==1.24.3
 
 # Medical AI Models (Optional - for real AI features)
 # Uncomment these if you want real AI capabilities:
+# CHANGE FROM:
+# torch==2.1.0
+# torchvision==0.16.0
+# torchxrayvision==1.2.0
+# easyocr==1.7.0
+
+# TO:
 torch==2.1.0
 torchvision==0.16.0
 torchxrayvision==1.2.0
 easyocr==1.7.0
-scikit-image==0.22.0  # Required for image preprocessing
+scikit-image==0.22.0
 
 # Data Processing
 pandas==2.1.3
