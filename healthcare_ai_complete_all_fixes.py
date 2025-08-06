@@ -2,6 +2,7 @@
 """
 Healthcare Multi-Agent System - Medical AI Models
 Includes TorchXRayVision for X-ray analysis and EasyOCR for lab extraction
+WITH GPU SUPPORT
 """
 
 import os
@@ -22,8 +23,21 @@ try:
     import torchxrayvision as xrv
     XRAY_AI_AVAILABLE = True
     print("✅ TorchXRayVision loaded - Real X-ray AI available!")
+    
+    # Check GPU availability
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+        print(f"✅ CUDA GPU detected: {torch.cuda.get_device_name(0)}")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+        print("✅ Apple Silicon GPU (MPS) detected!")
+    else:
+        device = torch.device("cpu")
+        print("⚠️  No GPU detected - using CPU")
+        
 except Exception as e:
     XRAY_AI_AVAILABLE = False
+    device = None
     print(f"⚠️ TorchXRayVision not available: {e}")
 
 # 2. EasyOCR for lab report text extraction
@@ -31,8 +45,15 @@ try:
     import easyocr
     OCR_AVAILABLE = True
     print("✅ EasyOCR loaded - Real lab value extraction available!")
+    # Note: EasyOCR GPU support depends on CUDA availability
+    use_gpu_ocr = torch.cuda.is_available() if 'torch' in sys.modules else False
+    if use_gpu_ocr:
+        print("✅ EasyOCR will use GPU")
+    else:
+        print("ℹ️  EasyOCR will use CPU")
 except:
     OCR_AVAILABLE = False
+    use_gpu_ocr = False
     print("⚠️ EasyOCR not available")
 
 print("="*60)
@@ -62,8 +83,15 @@ class MedicalAIModels:
             try:
                 print("Loading TorchXRayVision model...")
                 self.xray_model = xrv.models.DenseNet(weights="densenet121-res224-all")
-                self.xray_model.eval()
-                print("✅ X-ray model loaded successfully")
+                
+                # Move model to GPU if available
+                if device and device.type != 'cpu':
+                    self.xray_model = self.xray_model.to(device)
+                    print(f"✅ X-ray model loaded on {device.type.upper()}")
+                else:
+                    self.xray_model.eval()
+                    print("✅ X-ray model loaded on CPU")
+                    
             except Exception as e:
                 print(f"❌ Error loading X-ray model: {e}")
                 self.xray_model = None
@@ -74,8 +102,9 @@ class MedicalAIModels:
         if OCR_AVAILABLE:
             try:
                 print("Initializing EasyOCR...")
-                self.ocr_reader = easyocr.Reader(['en'], gpu=False)
-                print("✅ OCR initialized successfully")
+                # Use GPU if CUDA is available (not MPS)
+                self.ocr_reader = easyocr.Reader(['en'], gpu=use_gpu_ocr)
+                print(f"✅ OCR initialized {'with GPU' if use_gpu_ocr else 'on CPU'}")
             except Exception as e:
                 print(f"❌ Error initializing OCR: {e}")
                 self.ocr_reader = None
@@ -117,9 +146,17 @@ class FileAnalyzer:
             # Add batch and channel dimensions
             img = torch.from_numpy(img).unsqueeze(0).unsqueeze(0).float()
             
+            # Move to GPU if available
+            if device and device.type != 'cpu':
+                img = img.to(device)
+            
             # Get predictions
             with torch.no_grad():
                 outputs = ai_models.xray_model(img)
+            
+            # Move back to CPU for processing
+            if device and device.type != 'cpu':
+                outputs = outputs.cpu()
             
             # Convert outputs to probabilities
             probs = torch.sigmoid(outputs[0]).numpy()
@@ -156,7 +193,7 @@ class FileAnalyzer:
                 'patterns': patterns,
                 'impression': impression,
                 'ai_predictions': ai_predictions,
-                'ai_model': 'TorchXRayVision DenseNet121'
+                'ai_model': f'TorchXRayVision DenseNet121 ({device.type.upper()})'
             }
             
         except Exception as e:
