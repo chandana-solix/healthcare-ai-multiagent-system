@@ -1,0 +1,25 @@
+{
+  "basic_info": {
+    "patient_id": "P00018",
+    "age": 35,
+    "gender": "M"
+  },
+  "presentation": {
+    "chief_complaint": "Fever, productive cough, and chest pain",
+    "duration": "4 days",
+    "severity": "severe"
+  },
+  "vitals": {
+    "temperature_c": 39.2,
+    "heart_rate": 110,
+    "respiratory_rate": 24,
+    "blood_pressure": "118/75",
+    "oxygen_saturation": 89
+  },
+  "medical_history": {
+    "chronic_conditions": [],
+    "medications": [],
+    "allergies": [],
+    "smoking_history": "Never smoker"
+  }
+}

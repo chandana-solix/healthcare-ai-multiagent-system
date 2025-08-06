@@ -1,0 +1,25 @@
+{
+  "basic_info": {
+    "patient_id": "P00020",
+    "age": 65,
+    "gender": "M"
+  },
+  "presentation": {
+    "chief_complaint": "Confusion, high fever, and hypotension",
+    "duration": "12 hours",
+    "severity": "critical"
+  },
+  "vitals": {
+    "temperature_c": 40.1,
+    "heart_rate": 130,
+    "respiratory_rate": 28,
+    "blood_pressure": "85/50",
+    "oxygen_saturation": 85
+  },
+  "medical_history": {
+    "chronic_conditions": ["Diabetes Type 2", "Chronic kidney disease"],
+    "medications": ["Insulin", "Lisinopril"],
+    "allergies": [],
+    "recent_events": "UTI diagnosed 3 days ago, on antibiotics"
+  }
+}

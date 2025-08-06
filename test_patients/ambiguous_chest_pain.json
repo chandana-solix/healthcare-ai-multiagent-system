@@ -1,0 +1,26 @@
+{
+  "basic_info": {
+    "patient_id": "P00019",
+    "age": 62,
+    "gender": "M"
+  },
+  "presentation": {
+    "chief_complaint": "Chest pain, non-specific",
+    "duration": "6 hours",
+    "severity": "moderate",
+    "characteristics": "Atypical, not clearly cardiac or pulmonary"
+  },
+  "vitals": {
+    "temperature_c": 37.0,
+    "heart_rate": 88,
+    "respiratory_rate": 16,
+    "blood_pressure": "142/88",
+    "oxygen_saturation": 93
+  },
+  "medical_history": {
+    "chronic_conditions": ["Diabetes Type 2", "Hyperlipidemia"],
+    "medications": ["Metformin 1000mg BID", "Atorvastatin 40mg daily"],
+    "allergies": [],
+    "smoking_history": "Current smoker, 20 pack-years"
+  }
+}

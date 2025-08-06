@@ -1,0 +1,25 @@
+{
+  "basic_info": {
+    "patient_id": "P00017",
+    "age": 79,
+    "gender": "F"
+  },
+  "presentation": {
+    "chief_complaint": "Wheezing and chest tightness",
+    "duration": "2 days",
+    "severity": "moderate"
+  },
+  "vitals": {
+    "temperature_c": 37.2,
+    "heart_rate": 85,
+    "respiratory_rate": 18,
+    "blood_pressure": "135/82",
+    "oxygen_saturation": 90
+  },
+  "medical_history": {
+    "chronic_conditions": ["Mild COPD", "Hypertension"],
+    "medications": ["Lisinopril 10mg daily"],
+    "allergies": ["Penicillin"],
+    "smoking_history": "Former smoker, quit 10 years ago"
+  }
+}
