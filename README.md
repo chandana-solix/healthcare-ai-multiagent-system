@@ -57,6 +57,21 @@ This system demonstrates how multiple AI agents using **deep learning** can work
 - **Questions to Ask** - Important questions for your doctor
 - **Recovery Timeline** - What to expect during treatment
 
+## 🐳 Docker Deployment (Optional)
+
+The project includes Docker configuration for containerized deployment:
+
+```bash
+# With Docker Compose
+docker-compose up --build
+
+# Or with Docker directly
+docker build -t healthcare-ai .
+docker run -p 8000:8000 healthcare-ai
+```
+
+**Note:** Docker is optional. The system runs perfectly with Python directly.
+
 ## 🚀 Quick Start
 
 ### Prerequisites

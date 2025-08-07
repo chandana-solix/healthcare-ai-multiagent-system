@@ -1,0 +1,18 @@
+# Docker ignore file
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv
+.git/
+.gitignore
+.DS_Store
+*.log
+uploads/*
+test_data/*
+patients_info/
+*.zip
