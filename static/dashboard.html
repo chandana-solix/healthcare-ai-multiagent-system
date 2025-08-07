@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare AI Multi-Agent Analytics Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f1419;
+            color: #e1e8ed;
+            min-height: 100vh;
+        }
+        
+        .dashboard-container {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        /* Patient Header */
+        .patient-header {
+            background: #1a1f2e;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .patient-name {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        
+        .patient-info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .info-card {
+            background: #242937;
+            padding: 1rem;
+            border-radius: 12px;
+        }
+        
+        .info-label {
+            color: #6e7681;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-value {
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+        
+        /* Agent Cards Grid */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .agent-card {
+            background: #1a1f2e;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .agent-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .agent-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .agent-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .agent-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .agent-id {
+            color: #6e7681;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .risk-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+        
+        .risk-low {
+            background: #1c4e3f;
+            color: #4ade80;
+        }
+        
+        .risk-moderate {
+            background: #4a3c1f;
+            color: #fbbf24;
+        }
+        
+        .risk-high {
+            background: #4a1f1f;
+            color: #f87171;
+        }
+        
+        .risk-stable {
+            background: #1f3a4a;
+            color: #60a5fa;
+        }
+        
+        /* Score displays */
+        .score-display {
+            margin: 1.5rem 0;
+        }
+        
+        .score-label {
+            color: #6e7681;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .score-value {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .score-description {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #374151;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #60a5fa;
+            transition: width 0.3s ease;
+        }
+        
+        /* Risk factors */
+        .risk-factors {
+            background: #242937;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .risk-factor-item {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #1a1f2e;
+            border-radius: 8px;
+            border-left: 4px solid #60a5fa;
+        }
+        
+        .risk-factor-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        /* Score Explanation */
+        .score-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #93c5fd;
+            line-height: 1.4;
+        }
+        
+        .score-info-title {
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 0.25rem;
+        }
+        
+        .score-info-text {
+            color: #9ca3af;
+        }
+        
+        /* Risk explanation styles */
+        .risk-explanation {
+            margin: 0.75rem 0;
+            padding: 0.5rem;
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 3px solid #3b82f6;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: #93c5fd;
+            line-height: 1.4;
+        }
+        
+        .risk-explanation .value-highlight {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+        
+        .score-disposition {
+            margin-top: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+            color: #93c5fd;
+        }
+        
+        .risk-factor-value {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        
+        /* Consensus section */
+        .consensus-section {
+            background: #1a1f2e;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .consensus-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .consensus-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .consensus-subtitle {
+            color: #6e7681;
+            font-size: 0.875rem;
+        }
+        
+        .recommendation-item {
+            background: #242937;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #60a5fa;
+        }
+        
+        .recommendation-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .recommendation-details {
+            color: #9ca3af;
+            margin-bottom: 0.75rem;
+        }
+        
+        .consensus-score {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6e7681;
+            font-size: 0.875rem;
+        }
+        
+        /* Report section */
+        .report-section {
+            background: #1a1f2e;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .report-content {
+            background: #0f1419;
+            border-radius: 12px;
+            padding: 2rem;
+            font-family: 'Courier New', monospace;
+            line-height: 1.8;
+        }
+        
+        .copy-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .copy-button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        /* Upload section */
+        .upload-section {
+            background: #1a1f2e;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .upload-box {
+            background: #242937;
+            border: 2px dashed #374151;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-box:hover {
+            border-color: #60a5fa;
+            background: #2a3142;
+        }
+        
+        .upload-box.uploaded {
+            border-color: #4ade80;
+            border-style: solid;
+        }
+        
+        .analyze-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .analyze-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .analyze-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Real-time communication panel */
+        .communication-panel {
+            position: fixed;
+            right: 2rem;
+            top: 2rem;
+            width: 400px;
+            max-height: calc(100vh - 4rem);
+            background: #1a1f2e;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .communication-header {
+            background: #242937;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .communication-messages {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .agent-message {
+            background: #242937;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .agent-message.critical {
+            border-left: 4px solid #f87171;
+            background: #2a1f1f;
+        }
+        
+        .agent-message.consensus {
+            border-left: 4px solid #4ade80;
+            background: #1f2a1f;
+        }
+        
+        .message-agent {
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 0.5rem;
+        }
+        
+        .message-content {
+            color: #e1e8ed;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        /* Loading state */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .loading-content {
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #374151;
+            border-top: 4px solid #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.125rem;
+            color: #e1e8ed;
+        }
+        
+        /* Mode Toggle */
+        .mode-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #10b981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .mode-toggle:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <h2 style="margin-bottom: 1.5rem;">Upload Patient Data</h2>
+            <div class="upload-grid">
+                <div class="upload-box" onclick="document.getElementById('demographics').click()">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
+                    <div>Demographics (JSON)</div>
+                    <div id="demo-status" style="margin-top: 0.5rem; color: #4ade80;"></div>
+                </div>
+                <div class="upload-box" onclick="document.getElementById('lab').click()">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔬</div>
+                    <div>Lab Report (Image)</div>
+                    <div id="lab-status" style="margin-top: 0.5rem; color: #4ade80;"></div>
+                </div>
+                <div class="upload-box" onclick="document.getElementById('xray').click()">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🩻</div>
+                    <div>Chest X-Ray (Image)</div>
+                    <div id="xray-status" style="margin-top: 0.5rem; color: #4ade80;"></div>
+                </div>
+            </div>
+            <input type="file" id="demographics" accept=".json" style="display: none;">
+            <input type="file" id="lab" accept="image/*" style="display: none;">
+            <input type="file" id="xray" accept="image/*" style="display: none;">
+            <button class="analyze-button" onclick="analyzePatient()" disabled>
+                🤖 Start AI Multi-Agent Analysis
+            </button>
+        </div>
+        
+        <!-- Patient Header (hidden initially) -->
+        <div class="patient-header" id="patientHeader" style="display: none;">
+            <h1 class="patient-name" id="patientName">Loading...</h1>
+            <div class="patient-info">
+                <div class="info-card">
+                    <div class="info-label">Age / Gender</div>
+                    <div class="info-value" id="ageGender">-</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Chief Complaint</div>
+                    <div class="info-value" id="chiefComplaint">-</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Primary Diagnosis</div>
+                    <div class="info-value" id="primaryDiagnosis">-</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Urgency</div>
+                    <div class="info-value" id="urgency">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Agent Cards -->
+        <div class="agents-grid" id="agentsGrid" style="display: none;">
+            <!-- Risk Stratification -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-title">
+                        <div class="agent-icon">⚡</div>
+                        <div>
+                            <div class="agent-name">Risk Stratification</div>
+                            <div class="agent-id">Agent ID: clinical_risk_agent</div>
+                        </div>
+                    </div>
+                    <div class="risk-badge" id="riskBadge">-</div>
+                </div>
+                <div class="score-display">
+                    <div class="score-label">MEWS Score</div>
+                    <div class="score-value" id="mewsScore">0/14</div>
+                    <div class="score-description" id="mewsDesc">Calculating...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="mewsProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="score-info">
+                        <div class="score-info-title">What is MEWS?</div>
+                        <div class="score-info-text">Modified Early Warning Score - Predicts clinical deterioration based on vital signs. Higher scores (>4) indicate increased risk.</div>
+                    </div>
+                </div>
+                <div class="score-display">
+                    <div class="score-label">SIRS Score</div>
+                    <div class="score-value" id="sirsScore">0/4</div>
+                    <div class="score-description" id="sirsDesc">Calculating...</div>
+                    <div class="score-info">
+                        <div class="score-info-title">What is SIRS?</div>
+                        <div class="score-info-text">Systemic Inflammatory Response Syndrome - Identifies systemic inflammation. Score ≥2 suggests possible infection/sepsis.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lab Analysis -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-title">
+                        <div class="agent-icon">🔬</div>
+                        <div>
+                            <div class="agent-name">Lab Pattern Analysis</div>
+                            <div class="agent-id">Agent ID: lab_analyzer_agent</div>
+                        </div>
+                    </div>
+                    <div class="risk-badge" id="labBadge">-</div>
+                </div>
+                <div id="labFindings" style="margin-top: 1.5rem;">
+                    <div class="score-label">Key Findings</div>
+                    <div id="labPatterns" style="margin-top: 1rem;">
+                        <div class="risk-factor-item">
+                            <div class="risk-factor-name">Analyzing...</div>
+                            <div class="risk-factor-value">Please wait</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Imaging Analysis -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-title">
+                        <div class="agent-icon">🩻</div>
+                        <div>
+                            <div class="agent-name">Imaging Analysis</div>
+                            <div class="agent-id">Agent ID: image_analyzer_agent</div>
+                        </div>
+                    </div>
+                    <div class="risk-badge" id="imagingBadge">-</div>
+                </div>
+                <div id="imagingFindings" style="margin-top: 1.5rem;">
+                    <div class="score-label">X-Ray Findings</div>
+                    <div id="xrayResults" style="margin-top: 1rem;">
+                        <div class="risk-factor-item">
+                            <div class="risk-factor-name">Analyzing...</div>
+                            <div class="risk-factor-value">AI analysis in progress</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Clinical Decision -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-title">
+                        <div class="agent-icon">🏥</div>
+                        <div>
+                            <div class="agent-name">Clinical Decision</div>
+                            <div class="agent-id">Agent ID: clinical_decision_agent</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="clinicalPlan" style="margin-top: 1.5rem;">
+                    <div class="score-label">Treatment Plan</div>
+                    <div id="treatmentItems" style="margin-top: 1rem;">
+                        <div class="risk-factor-item">
+                            <div class="risk-factor-name">Synthesizing findings...</div>
+                            <div class="risk-factor-value">Please wait</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cost Analysis -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-title">
+                        <div class="agent-icon">📊</div>
+                        <div>
+                            <div class="agent-name">Healthcare Analytics</div>
+                            <div class="agent-id">Agent ID: analytics_agent</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="score-display">
+                    <div class="score-label">Predicted Length of Stay</div>
+                    <div class="score-value" id="losValue">-</div>
+                    <div class="score-description" id="losDesc">Calculating...</div>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <div class="score-label">Estimated Total Cost</div>
+                    <div style="font-size: 2rem; font-weight: 700; margin-top: 0.5rem;" id="costEstimate">-</div>
+                </div>
+            </div>
+            
+            <!-- Consensus Builder -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-title">
+                        <div class="agent-icon">🤝</div>
+                        <div>
+                            <div class="agent-name">Consensus Builder</div>
+                            <div class="agent-id">Agent ID: consensus_builder_agent</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <div class="score-label">Agent Agreement</div>
+                    <div class="score-value" id="consensusScore">0%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="consensusProgress" style="width: 0%; background: #4ade80;"></div>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <div class="score-label" id="consensusStatus">Building consensus...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Consensus Recommendations -->
+        <div class="consensus-section" id="consensusSection" style="display: none;">
+            <div class="consensus-header">
+                <div class="agent-icon" style="font-size: 2rem;">🎯</div>
+                <div>
+                    <div class="consensus-title">Consensus Recommendations</div>
+                    <div class="consensus-subtitle">Aggregated insights from all agents</div>
+                </div>
+            </div>
+            <div id="recommendationsList"></div>
+        </div>
+        
+        <!-- Patient Summary Report -->
+        <div class="report-section" id="reportSection" style="display: none;">
+            <div class="report-header">
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">
+                        📄 Patient Summary Report
+                    </div>
+                    <div style="color: #6e7681;">AI-generated clinical summary</div>
+                </div>
+                <button class="copy-button" onclick="copyReport()">Copy Report</button>
+            </div>
+            <div class="report-content" id="reportContent"></div>
+        </div>
+        
+        <!-- Analysis time -->
+        <div style="text-align: center; color: #6e7681; margin-top: 2rem;" id="analysisTime"></div>
+    </div>
+    
+    <!-- Real-time Communication Panel -->
+    <div class="communication-panel" id="communicationPanel">
+        <div class="communication-header">
+            <div style="font-weight: 600;">💬 Agent Communication</div>
+            <button onclick="toggleCommunication()" style="background: none; border: none; color: #6e7681; cursor: pointer;">×</button>
+        </div>
+        <div class="communication-messages" id="agentMessages">
+            <div class="agent-message">
+                <div class="message-agent">System</div>
+                <div class="message-content">Waiting for patient data...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">AI agents are analyzing patient data...</div>
+        </div>
+    </div>
+    
+    <!-- Mode Toggle to Patient View -->
+    <a href="#" class="mode-toggle" onclick="goToPatientView(event)">👤 Patient View</a>
+    
+    <script>
+        let uploadedFiles = {
+            demographics: null,
+            lab: null,
+            xray: null
+        };
+        
+        let ws = null;
+        let analysisResults = null;
+        
+        // Setup WebSocket
+        function setupWebSocket() {
+            ws = new WebSocket('ws://localhost:8000/ws');
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'agent_message') {
+                    addAgentMessage(data);
+                }
+            };
+        }
+        
+        function addAgentMessage(data) {
+            const messagesDiv = document.getElementById('agentMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'agent-message';
+            
+            if (data.topic && data.topic.includes('critical')) {
+                messageDiv.className += ' critical';
+            } else if (data.topic && data.topic.includes('consensus')) {
+                messageDiv.className += ' consensus';
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-agent">${data.agent || 'Unknown'}</div>
+                <div class="message-content">${formatMessageContent(data)}</div>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function formatMessageContent(data) {
+            if (typeof data.content === 'object') {
+                return `<strong>${data.topic}:</strong> ${JSON.stringify(data.content, null, 2).substring(0, 100)}...`;
+            }
+            return `<strong>${data.topic}:</strong> ${data.content}`;
+        }
+        
+        // File upload handlers
+        document.getElementById('demographics').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                uploadedFiles.demographics = file;
+                document.getElementById('demo-status').textContent = `✅ ${file.name}`;
+                document.querySelector('.upload-box').classList.add('uploaded');
+                checkReadyToAnalyze();
+            }
+        });
+        
+        document.getElementById('lab').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                uploadedFiles.lab = file;
+                document.getElementById('lab-status').textContent = `✅ ${file.name}`;
+                document.querySelectorAll('.upload-box')[1].classList.add('uploaded');
+                checkReadyToAnalyze();
+            }
+        });
+        
+        document.getElementById('xray').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                uploadedFiles.xray = file;
+                document.getElementById('xray-status').textContent = `✅ ${file.name}`;
+                document.querySelectorAll('.upload-box')[2].classList.add('uploaded');
+                checkReadyToAnalyze();
+            }
+        });
+        
+        function checkReadyToAnalyze() {
+            const btn = document.querySelector('.analyze-button');
+            if (uploadedFiles.demographics && uploadedFiles.lab && uploadedFiles.xray) {
+                btn.disabled = false;
+            }
+        }
+        
+        async function analyzePatient() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('agentMessages').innerHTML = '';
+            
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                setupWebSocket();
+            }
+            
+            const formData = new FormData();
+            formData.append('demographics', uploadedFiles.demographics);
+            formData.append('lab_report', uploadedFiles.lab);
+            formData.append('xray', uploadedFiles.xray);
+            
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                analysisResults = await response.json();
+                
+                if (analysisResults.error) {
+                    throw new Error(analysisResults.error);
+                }
+                
+                displayResults(analysisResults);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error analyzing patient: ' + error.message);
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        }
+        
+        function displayResults(data) {
+            // Hide upload section, show results
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('patientHeader').style.display = 'block';
+            document.getElementById('agentsGrid').style.display = 'grid';
+            document.getElementById('consensusSection').style.display = 'block';
+            document.getElementById('reportSection').style.display = 'block';
+            
+            // Update patient header
+            const patient = data.patient;
+            document.getElementById('patientName').textContent = `Patient ${patient.patient_id}`;
+            document.getElementById('ageGender').textContent = `${patient.age} years / ${patient.gender}`;
+            document.getElementById('chiefComplaint').textContent = patient.chief_complaint;
+            document.getElementById('primaryDiagnosis').textContent = data.consensus.primary_diagnosis;
+            document.getElementById('urgency').textContent = determineUrgency(data);
+            
+            // Update risk scores
+            updateRiskScores(data);
+            
+            // Update lab findings
+            updateLabFindings(data);
+            
+            // Update imaging findings
+            updateImagingFindings(data);
+            
+            // Update clinical plan
+            updateClinicalPlan(data);
+            
+            // Update analytics
+            updateAnalytics(data);
+            
+            // Update consensus
+            updateConsensus(data);
+            
+            // Generate report
+            generateReport(data);
+            
+            // Show analysis time
+            document.getElementById('analysisTime').textContent = 
+                `Total analysis completed in ${data.analysis_time}`;
+        }
+        
+        function determineUrgency(data) {
+            const risk = data.detailed_findings.risk?.overall_risk;
+            if (risk === 'CRITICAL') return 'STAT';
+            if (risk === 'HIGH') return 'Urgent';
+            if (risk === 'MODERATE') return 'Semi-urgent';
+            return 'Routine';
+        }
+        
+        function updateRiskScores(data) {
+            const risk = data.detailed_findings.risk;
+            if (!risk) return;
+            
+            // Update risk badge
+            const riskLevel = risk.overall_risk || 'LOW';
+            const badge = document.getElementById('riskBadge');
+            badge.textContent = riskLevel;
+            badge.className = 'risk-badge risk-' + riskLevel.toLowerCase();
+            
+            // Update MEWS score
+            if (risk.key_scores?.MEWS) {
+                const mews = risk.key_scores.MEWS;
+                document.getElementById('mewsScore').textContent = `${mews.score}/${mews.max}`;
+                document.getElementById('mewsProgress').style.width = `${(mews.score/mews.max)*100}%`;
+                
+                // Update MEWS description based on score
+                let mewsInterpretation = '';
+                if (mews.score === 0) {
+                    mewsInterpretation = 'No acute illness';
+                } else if (mews.score <= 2) {
+                    mewsInterpretation = 'Low risk - Ward care';
+                } else if (mews.score <= 4) {
+                    mewsInterpretation = 'Medium risk - Increased monitoring';
+                } else if (mews.score <= 6) {
+                    mewsInterpretation = 'High risk - Urgent review needed';
+                } else {
+                    mewsInterpretation = 'Critical - Immediate escalation';
+                }
+                
+                // Get dynamic explanation
+                const explanation = getRiskExplanation(risk);
+                
+                // Remove old explanation and disposition if they exist
+                const oldExpl = document.getElementById('riskExplanation');
+                if (oldExpl) oldExpl.remove();
+                const oldDisp = document.getElementById('scoreDisposition');
+                if (oldDisp) oldDisp.remove();
+                
+                // Create integrated explanation
+                const explDiv = document.createElement('div');
+                explDiv.id = 'riskExplanation';
+                explDiv.className = 'risk-explanation';
+                explDiv.innerHTML = explanation.replace(/(WBC: [\d.]+|CRP: [\d.]+)/g, '<span class="value-highlight">$1↑</span>');
+                
+                // Insert after MEWS score
+                const mewsScoreElement = document.getElementById('mewsScore');
+                mewsScoreElement.parentNode.insertBefore(explDiv, mewsScoreElement.nextSibling);
+                
+                // Create disposition box
+                const dispDiv = document.createElement('div');
+                dispDiv.id = 'scoreDisposition';
+                dispDiv.className = 'score-disposition';
+                dispDiv.textContent = `[${risk.disposition || mewsInterpretation}]`;
+                
+                // Insert before progress bar
+                const progressBar = mewsScoreElement.parentNode.querySelector('.progress-bar');
+                progressBar.parentNode.insertBefore(dispDiv, progressBar);
+                
+                // Remove the old desc element
+                document.getElementById('mewsDesc').style.display = 'none';
+            }
+            
+            // Update SIRS score
+            if (risk.key_scores?.SIRS) {
+                const sirs = risk.key_scores.SIRS;
+                document.getElementById('sirsScore').textContent = `${sirs.score}/${sirs.max}`;
+                
+                let sirsInterpretation = '';
+                if (sirs.score === 0) {
+                    sirsInterpretation = 'No systemic inflammation';
+                } else if (sirs.score === 1) {
+                    sirsInterpretation = 'Minimal inflammation';
+                } else if (sirs.score === 2) {
+                    sirsInterpretation = 'Meets SIRS criteria - Monitor for sepsis';
+                } else if (sirs.score === 3) {
+                    sirsInterpretation = 'Significant inflammation - Possible sepsis';
+                } else {
+                    sirsInterpretation = 'Severe SIRS - High sepsis risk';
+                }
+                
+                document.getElementById('sirsDesc').textContent = sirsInterpretation;
+            }
+        }
+        
+        function getRiskExplanation(risk) {
+            const overall = risk.overall_risk;
+            const mews = risk.key_scores?.MEWS;
+            const sirs = risk.key_scores?.SIRS;
+            const factors = risk.risk_factors || [];
+            
+            // Check for discrepancy
+            if (overall === 'HIGH' || overall === 'CRITICAL') {
+                if (mews?.risk === 'LOW' && sirs?.risk === 'LOW') {
+                    // Find lab values in risk factors
+                    const labFactor = factors.find(f => f.includes('WBC') || f.includes('CRP'));
+                    if (labFactor) {
+                        const matches = labFactor.match(/(WBC: [\d.]+|CRP: [\d.]+)/g);
+                        if (matches) {
+                            return `Despite low clinical scores, critical lab values (${matches.join(', ')}) indicate severe infection`;
+                        }
+                    }
+                    
+                    const ageFactor = factors.find(f => f.toLowerCase().includes('age') || f.toLowerCase().includes('elderly'));
+                    if (ageFactor) {
+                        return `Clinical scores low, but ${ageFactor.toLowerCase()} increases risk`;
+                    }
+                    
+                    return 'Multiple factors elevate risk despite low clinical scores';
+                }
+            }
+            
+            return `Clinical scores consistent with ${overall} risk assessment`;
+        }
+        
+        function updateLabFindings(data) {
+            const lab = data.detailed_findings.lab;
+            if (!lab) return;
+            
+            const patterns = lab.patterns || [];
+            const badge = document.getElementById('labBadge');
+            
+            if (patterns.includes('SEVERE_BACTERIAL_INFECTION')) {
+                badge.textContent = 'CRITICAL';
+                badge.className = 'risk-badge risk-high';
+            } else if (patterns.length > 0) {
+                badge.textContent = 'ABNORMAL';
+                badge.className = 'risk-badge risk-moderate';
+            } else {
+                badge.textContent = 'NORMAL';
+                badge.className = 'risk-badge risk-low';
+            }
+            
+            // Display patterns
+            const patternsHtml = patterns.length > 0 ? patterns.map(p => `
+                <div class="risk-factor-item">
+                    <div class="risk-factor-name">${p.replace(/_/g, ' ')}</div>
+                    <div class="risk-factor-value">Pattern detected</div>
+                </div>
+            `).join('') : `
+                <div class="risk-factor-item">
+                    <div class="risk-factor-name">No significant patterns</div>
+                    <div class="risk-factor-value">Lab values within normal limits</div>
+                </div>
+            `;
+            
+            document.getElementById('labPatterns').innerHTML = patternsHtml;
+            
+            // Add integrated lab explanation
+            const labExplanation = getLabExplanation(lab);
+            const labPatternDiv = document.getElementById('labPatterns');
+            
+            // Remove old explanation if exists
+            const oldLabExpl = document.getElementById('labExplanation');
+            if (oldLabExpl) oldLabExpl.remove();
+            
+            // Add new integrated explanation
+            const labExplDiv = document.createElement('div');
+            labExplDiv.id = 'labExplanation';
+            labExplDiv.className = 'risk-explanation';
+            labExplDiv.innerHTML = labExplanation.replace(/(WBC [\d.]+|CRP [\d.]+)/g, '<span class="value-highlight">$1</span>');
+            labPatternDiv.appendChild(labExplDiv);
+        }
+        
+        function getLabExplanation(lab) {
+            const patterns = lab.patterns || [];
+            const keyValues = lab.key_values || {};
+            
+            if (patterns.includes('SEVERE_BACTERIAL_INFECTION')) {
+                const wbc = keyValues.wbc || 0;
+                const crp = keyValues.crp || 0;
+                return `Severe infection markers: WBC ${wbc}, CRP ${crp}`;
+            } else if (patterns.includes('BACTERIAL_INFECTION')) {
+                return 'Elevated inflammatory markers suggest bacterial infection';
+            } else if (patterns.length > 0) {
+                return `${patterns[0].replace(/_/g, ' ').toLowerCase()} pattern detected`;
+            } else if (lab.abnormal_count > 0) {
+                return `${lab.abnormal_count} abnormal values found, monitoring recommended`;
+            } else {
+                return 'All lab values within normal limits';
+            }
+        }
+        
+        function updateImagingFindings(data) {
+            const imaging = data.detailed_findings.imaging;
+            if (!imaging) return;
+            
+            const badge = document.getElementById('imagingBadge');
+            
+            if (imaging.impression?.toLowerCase().includes('pneumonia')) {
+                badge.textContent = 'ABNORMAL';
+                badge.className = 'risk-badge risk-high';
+            } else if (imaging.impression?.toLowerCase().includes('normal')) {
+                badge.textContent = 'NORMAL';
+                badge.className = 'risk-badge risk-low';
+            } else {
+                badge.textContent = 'REVIEW';
+                badge.className = 'risk-badge risk-moderate';
+            }
+            
+            // Display findings
+            const findings = imaging.key_findings || ['No acute findings'];
+            const findingsHtml = findings.slice(0, 3).map(f => `
+                <div class="risk-factor-item">
+                    <div class="risk-factor-name">${f}</div>
+                    <div class="risk-factor-value">AI confidence included</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('xrayResults').innerHTML = findingsHtml;
+            
+            // Add integrated imaging explanation
+            const imagingExplanation = getImagingExplanation(imaging);
+            const xrayResultsDiv = document.getElementById('xrayResults');
+            
+            // Remove old explanation if exists
+            const oldImgExpl = document.getElementById('imagingExplanation');
+            if (oldImgExpl) oldImgExpl.remove();
+            
+            // Add new integrated explanation
+            const imgExplDiv = document.createElement('div');
+            imgExplDiv.id = 'imagingExplanation';
+            imgExplDiv.className = 'risk-explanation';
+            imgExplDiv.textContent = imagingExplanation;
+            xrayResultsDiv.appendChild(imgExplDiv);
+        }
+        
+        function getImagingExplanation(imaging) {
+            const impression = imaging.impression || '';
+            const findings = imaging.key_findings || [];
+            
+            // Count significant findings
+            let significantCount = 0;
+            findings.forEach(f => {
+                if (f.includes('confidence:')) {
+                    const conf = parseFloat(f.match(/confidence: (\d+)%/)?.[1] || 0);
+                    if (conf > 60) significantCount++;
+                }
+            });
+            
+            if (impression.toLowerCase().includes('pneumonia')) {
+                if (significantCount > 0) {
+                    return `Pneumonia confirmed with ${significantCount} significant findings`;
+                }
+                return 'Pneumonia suspected based on imaging pattern';
+            } else if (significantCount > 0) {
+                return `${significantCount} findings need clinical correlation`;
+            } else if (impression.toLowerCase().includes('normal')) {
+                return 'No acute cardiopulmonary process identified';
+            } else {
+                return 'Subtle findings - correlate with clinical symptoms';
+            }
+        }
+        
+        function updateClinicalPlan(data) {
+            const plan = data.action_plan;
+            const clinical = data.detailed_findings.clinical_decision;
+            if (!plan) return;
+            
+            const items = [];
+            if (plan.immediate_actions?.length) {
+                items.push(...plan.immediate_actions.map(a => ({
+                    name: a,
+                    type: 'Immediate'
+                })));
+            }
+            if (plan.within_1_hour?.length) {
+                items.push(...plan.within_1_hour.map(a => ({
+                    name: a,
+                    type: 'Within 1 hour'
+                })));
+            }
+            
+            const planHtml = items.slice(0, 3).map(item => `
+                <div class="risk-factor-item">
+                    <div class="risk-factor-name">${item.name}</div>
+                    <div class="risk-factor-value">${item.type}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('treatmentItems').innerHTML = planHtml || 
+                '<div class="risk-factor-item"><div class="risk-factor-name">Supportive care</div></div>';
+                
+            // Add integrated clinical explanation
+            if (clinical) {
+                const clinicalExplanation = getClinicalExplanation(clinical, data.detailed_findings.risk?.overall_risk);
+                const treatmentDiv = document.getElementById('treatmentItems');
+                
+                // Remove old explanation if exists
+                const oldClinExpl = document.getElementById('clinicalExplanation');
+                if (oldClinExpl) oldClinExpl.remove();
+                
+                // Add new integrated explanation
+                const clinExplDiv = document.createElement('div');
+                clinExplDiv.id = 'clinicalExplanation';
+                clinExplDiv.className = 'risk-explanation';
+                clinExplDiv.textContent = clinicalExplanation;
+                treatmentDiv.appendChild(clinExplDiv);
+            }
+        }
+        
+        function getClinicalExplanation(clinical, riskLevel) {
+            const diagnosis = clinical.primary_diagnosis || 'Unknown';
+            const confidence = clinical.confidence || 0;
+            
+            if (diagnosis.toLowerCase().includes('pneumonia') && confidence > 0.8) {
+                return `High confidence in ${diagnosis} - antibiotics started`;
+            } else if (diagnosis.toLowerCase().includes('sepsis')) {
+                return 'Sepsis protocol activated - broad spectrum coverage';
+            } else if (confidence > 0.6) {
+                return `${diagnosis} likely, empiric treatment started`;
+            } else {
+                return `Working diagnosis: ${diagnosis}, monitoring response`;
+            }
+        }
+        
+        function updateAnalytics(data) {
+            // Get risk level and diagnosis
+            const risk = data.detailed_findings.risk?.overall_risk || 'MODERATE';
+            const diagnosis = data.consensus.primary_diagnosis || 'Unknown';
+            const age = data.patient.age || 50;
+            
+            // Estimate LOS based on diagnosis and risk (matching Python logic)
+            let los = 3; // default
+            if (risk === 'CRITICAL') los = 7;
+            else if (risk === 'HIGH') los = 5;
+            else if (risk === 'MODERATE') los = 3;
+            else if (risk === 'LOW') los = 1;
+            
+            // Adjust for specific conditions
+            if (diagnosis.toLowerCase().includes('sepsis') && risk === 'CRITICAL') {
+                los = 10;
+            } else if (diagnosis.toLowerCase().includes('pneumonia') && risk === 'HIGH') {
+                los = 6;
+            }
+            
+            document.getElementById('losValue').textContent = `${los} days`;
+            document.getElementById('losDesc').textContent = `Expected discharge: ${new Date(Date.now() + los * 24 * 60 * 60 * 1000).toLocaleDateString()}`;
+            
+            // Calculate cost using same logic as Python
+            const dailyRates = {
+                'CRITICAL': 3500,
+                'HIGH': 2500,
+                'MODERATE': 1500,
+                'LOW': 800
+            };
+            
+            const dailyRate = dailyRates[risk] || 1500;
+            const baseCost = los * dailyRate;
+            
+            // Diagnosis-specific costs
+            let diagnosisCost = 0;
+            const diagnosisLower = diagnosis.toLowerCase();
+            if (diagnosisLower.includes('pneumonia')) diagnosisCost = 2000;
+            else if (diagnosisLower.includes('sepsis')) diagnosisCost = 3500;
+            else if (diagnosisLower.includes('heart failure')) diagnosisCost = 2500;
+            else if (diagnosisLower.includes('copd')) diagnosisCost = 1500;
+            else if (diagnosisLower.includes('bronchitis')) diagnosisCost = 800;
+            
+            // Age adjustment
+            let ageMultiplier = 1.0;
+            if (age > 75) ageMultiplier = 1.15;
+            else if (age > 65) ageMultiplier = 1.10;
+            else if (age < 18) ageMultiplier = 1.10;
+            
+            // Calculate total
+            const totalCost = Math.round((baseCost + diagnosisCost) * ageMultiplier);
+            document.getElementById('costEstimate').textContent = `${totalCost.toLocaleString()}`;
+            
+            // Add integrated analytics explanation  
+            const analyticsExplanation = getAnalyticsExplanation(los, totalCost, risk, diagnosis);
+            
+            // Find the parent element for analytics
+            const costElement = document.getElementById('costEstimate');
+            const analyticsContainer = costElement.parentElement;
+            
+            // Remove old explanation if exists
+            const oldAnalExpl = document.getElementById('analyticsExplanation');
+            if (oldAnalExpl) oldAnalExpl.remove();
+            
+            // Add new integrated explanation
+            const analExplDiv = document.createElement('div');
+            analExplDiv.id = 'analyticsExplanation';
+            analExplDiv.className = 'risk-explanation';
+            analExplDiv.style.marginTop = '1rem';
+            analExplDiv.textContent = analyticsExplanation;
+            analyticsContainer.appendChild(analExplDiv);
+        }
+        
+        function getAnalyticsExplanation(los, cost, risk, diagnosis) {
+            if (risk === 'CRITICAL') {
+                return 'Extended stay expected due to critical condition';
+            } else if (risk === 'HIGH' && diagnosis.toLowerCase().includes('sepsis')) {
+                return `Complex sepsis management requires ${los}-day stay`;
+            } else if (risk === 'HIGH') {
+                return `Typical ${los}-day stay for severe infection`;
+            } else if (los > 5) {
+                return 'Longer stay due to complexity of care';
+            } else {
+                return `Standard admission for ${risk.toLowerCase()} risk patient`;
+            }
+        }
+        
+        function updateConsensus(data) {
+            const consensus = data.consensus;
+            const confidence = consensus.confidence_level?.includes('HIGH') ? 88 : 
+                              consensus.confidence_level?.includes('MODERATE') ? 65 : 45;
+            
+            document.getElementById('consensusScore').textContent = `${confidence}%`;
+            document.getElementById('consensusProgress').style.width = `${confidence}%`;
+            document.getElementById('consensusStatus').textContent = 
+                consensus.dissenting_opinions?.length > 0 ? 
+                'Some disagreement resolved through safety-first approach' : 
+                'Strong agreement among all agents';
+            
+            // Build recommendations
+            const recommendations = [];
+            
+            recommendations.push({
+                title: 'Primary Diagnosis',
+                details: consensus.primary_diagnosis,
+                score: confidence,
+                agents: ['All agents']
+            });
+            
+            recommendations.push({
+                title: 'Disposition',
+                details: consensus.disposition,
+                score: 85,
+                agents: ['clinical_risk_agent', 'consensus_builder']
+            });
+            
+            if (data.action_plan.immediate_actions?.length > 0) {
+                recommendations.push({
+                    title: 'Immediate Interventions',
+                    details: data.action_plan.immediate_actions[0],
+                    score: 90,
+                    agents: ['clinical_decision_agent']
+                });
+            }
+            
+            const recsHtml = recommendations.map(rec => `
+                <div class="recommendation-item">
+                    <div class="recommendation-title">${rec.title}</div>
+                    <div class="recommendation-details">${rec.details}</div>
+                    <div class="consensus-score">
+                        Consensus Score: ${rec.score}% | Supporting Agents: ${rec.agents.join(', ')}
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('recommendationsList').innerHTML = recsHtml;
+            
+            // Add integrated consensus explanation
+            const consensusExplanation = getConsensusExplanation(confidence, consensus);
+            const consensusContainer = document.querySelector('#consensusStatus').parentElement;
+            
+            // Remove old explanation if exists
+            const oldConsExpl = document.getElementById('consensusExplanation');
+            if (oldConsExpl) oldConsExpl.remove();
+            
+            // Add new integrated explanation
+            const consExplDiv = document.createElement('div');
+            consExplDiv.id = 'consensusExplanation';
+            consExplDiv.className = 'risk-explanation';
+            consExplDiv.style.marginTop = '1rem';
+            consExplDiv.textContent = consensusExplanation;
+            consensusContainer.appendChild(consExplDiv);
+        }
+        
+        function getConsensusExplanation(agreementPct, consensus) {
+            const dissenting = consensus.dissenting_opinions || [];
+            
+            if (agreementPct >= 80) {
+                return 'Strong consensus - all agents agree on approach';
+            } else if (agreementPct >= 60) {
+                return 'Good agreement with minor variations in approach';
+            } else if (dissenting.length > 0 && dissenting[0].toLowerCase().includes('diagnosis')) {
+                return 'Agents debated diagnosis - clinical judgment prevailed';
+            } else if (agreementPct < 50) {
+                return 'Complex case with multiple valid approaches';
+            } else {
+                return 'Moderate consensus reached after discussion';
+            }
+        }
+        
+        function generateReport(data) {
+            const report = `${data.patient.name || 'Patient'} is a ${data.patient.age}-year-old ${data.patient.gender} presenting with ${data.patient.chief_complaint}.
+
+RISK ASSESSMENT: The patient is classified as ${data.detailed_findings.risk?.overall_risk || 'UNKNOWN'} risk overall.
+
+PRIMARY DIAGNOSIS: ${data.consensus.primary_diagnosis}
+
+KEY FINDINGS:
+- Lab Analysis: ${data.detailed_findings.lab?.patterns?.join(', ') || 'No significant patterns'}
+- Imaging: ${data.detailed_findings.imaging?.impression || 'Pending'}
+- Clinical Scores: MEWS ${data.detailed_findings.risk?.key_scores?.MEWS?.score || 0}/${data.detailed_findings.risk?.key_scores?.MEWS?.max || 14}
+
+CONSENSUS RECOMMENDATIONS:
+1. ${data.consensus.disposition}
+2. ${data.action_plan.immediate_actions?.[0] || 'Continue current management'}
+3. ${data.action_plan.within_1_hour?.[0] || 'Monitor closely'}
+
+AGENT COMMUNICATION: ${data.agent_communication.total_messages} messages exchanged, ${data.agent_communication.consensus_topics} consensus topics discussed.`;
+            
+            document.getElementById('reportContent').textContent = report;
+        }
+        
+        function copyReport() {
+            const report = document.getElementById('reportContent').textContent;
+            navigator.clipboard.writeText(report).then(() => {
+                const btn = document.querySelector('.copy-button');
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    btn.textContent = 'Copy Report';
+                }, 2000);
+            });
+        }
+        
+        function toggleCommunication() {
+            const panel = document.getElementById('communicationPanel');
+            panel.style.transform = panel.style.transform === 'translateX(100%)' ? 'translateX(0)' : 'translateX(100%)';
+        }
+        
+        function goToPatientView(event) {
+            event.preventDefault();
+            
+            // If we have analysis results, store them for the patient view
+            if (analysisResults) {
+                sessionStorage.setItem('analysisResults', JSON.stringify(analysisResults));
+                // Navigate to patient view
+                window.location.href = '/patient';
+            } else {
+                // No analysis yet, still navigate to patient view (it will show test data)
+                window.location.href = '/patient';
+            }
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            setupWebSocket();
+            
+            // Check if returning from patient view with analysis data
+            const returnToAnalysis = sessionStorage.getItem('returnToAnalysis');
+            const savedResults = sessionStorage.getItem('analysisResults');
+            
+            if (returnToAnalysis === 'true' && savedResults) {
+                // Clear the flag
+                sessionStorage.removeItem('returnToAnalysis');
+                
+                // Restore the analysis results
+                analysisResults = JSON.parse(savedResults);
+                displayResults(analysisResults);
+                
+                // Add a notice that we've restored the view
+                const notice = document.createElement('div');
+                notice.style.cssText = 'position: fixed; top: 2rem; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 1rem 2rem; border-radius: 8px; z-index: 1000; animation: fadeIn 0.3s ease-out;';
+                notice.textContent = '✓ Returned to Hospital View - Analysis restored';
+                document.body.appendChild(notice);
+                
+                // Remove notice after 3 seconds
+                setTimeout(() => {
+                    notice.style.animation = 'fadeOut 0.3s ease-out';
+                    setTimeout(() => notice.remove(), 300);
+                }, 3000);
+            }
+        });
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                to { opacity: 1; transform: translateX(-50%) translateY(0); }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; transform: translateX(-50%) translateY(0); }
+                to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

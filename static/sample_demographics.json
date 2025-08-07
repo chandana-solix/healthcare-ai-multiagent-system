@@ -1,0 +1,30 @@
+{
+  "basic_info": {
+    "patient_id": "P00001",
+    "age": 56,
+    "gender": "F",
+    "height_cm": 173.4,
+    "weight_kg": 78.0,
+    "bmi": 25.9
+  },
+  "presentation": {
+    "chief_complaint": "Shortness of breath and chest pain",
+    "duration": "3 days",
+    "severity": "Worsening",
+    "admission_date": "2025-07-25",
+    "triage_priority": "Urgent"
+  },
+  "medical_history": {
+    "chronic_conditions": ["Hypertension", "Type 2 Diabetes"],
+    "medications": ["Metformin", "Lisinopril"],
+    "allergies": ["None"],
+    "smoking": "Former"
+  },
+  "vitals": {
+    "temperature_c": 38.5,
+    "heart_rate": 97,
+    "respiratory_rate": 25,
+    "blood_pressure": "145/92",
+    "oxygen_saturation": 93
+  }
+}

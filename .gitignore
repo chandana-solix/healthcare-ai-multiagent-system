@@ -61,8 +61,6 @@ dist-ssr/
 frontend/dist/
 frontend/build/
 backend/static/uploads/
-static/
-
 # Database
 *.db
 *.sqlite

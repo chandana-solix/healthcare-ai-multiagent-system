@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Health Report Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f1419;  /* DASHBOARD BACKGROUND */
+            color: #e1e8ed;      /* DASHBOARD TEXT */
+            min-height: 100vh;
+        }
+        
+        /* Container - SAME AS DASHBOARD */
+        .dashboard-container {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        /* Header - MATCHING DASHBOARD */
+        .patient-header {
+            background: #1a1f2e;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .page-subtitle {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin-top: 0.25rem;
+        }
+        
+        .back-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        /* Alert Card */
+        .alert-card {
+            background: #1a1f2e;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .alert-card.critical {
+            border: 2px solid #dc2626;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, #1a1f2e 100%);
+        }
+        
+        .alert-card.moderate {
+            border: 2px solid #f59e0b;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, #1a1f2e 100%);
+        }
+        
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(220, 38, 38, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .alert-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .alert-reason {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid #dc2626;
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Cards Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        /* Card Styles - EXACTLY LIKE DASHBOARD */
+        .card {
+            background: #1a1f2e;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #e1e8ed;
+        }
+        
+        /* Metric Display */
+        .metric {
+            margin-bottom: 1.5rem;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: #6e7681;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+        
+        .metric-detail {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        /* List Styles */
+        .styled-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .styled-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(45, 53, 72, 0.5);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            color: #9ca3af;
+        }
+        
+        .styled-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .list-icon {
+            color: #3b82f6;
+            font-size: 1.25rem;
+            margin-top: 0.125rem;
+        }
+        
+        /* Cost Section */
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(45, 53, 72, 0.5);
+        }
+        
+        .cost-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cost-label {
+            color: #6e7681;
+        }
+        
+        .cost-value {
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .total-cost {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #3b82f6;
+        }
+        
+        .total-cost .cost-value {
+            font-size: 1.5rem;
+            color: #3b82f6;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-critical {
+            background: rgba(220, 38, 38, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+        
+        .status-normal {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        /* Options Section */
+        .option-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(45, 53, 72, 0.5);
+            transition: all 0.2s;
+        }
+        
+        .option-card:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .option-suitable {
+            border-left: 3px solid #22c55e;
+        }
+        
+        .option-not-suitable {
+            border-left: 3px solid #ef4444;
+        }
+        
+        /* Red Flags */
+        .red-flag-item {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .red-flag-icon {
+            color: #ef4444;
+            font-size: 1.25rem;
+        }
+        
+        /* Tab Navigation */
+        .tab-navigation {
+            background: #1a1f2e;
+            border-radius: 16px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .tab-button {
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .tab-button:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+        }
+        
+        .tab-button.active {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Report Section Styles */
+        .report-section {
+            background: #1a1f2e;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(45, 53, 72, 0.5);
+        }
+        
+        .report-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .report-content {
+            background: #0f1419;
+            border-radius: 12px;
+            padding: 2rem;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #e1e8ed;
+        }
+        
+        .report-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .report-section-content {
+            color: #9ca3af;
+            margin-bottom: 1.5rem;
+        }
+        
+        .copy-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .copy-button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        /* Value Highlight */
+        .value-highlight {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Mode Toggle - SAME STYLE AS DASHBOARD */
+        .mode-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #10b981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .mode-toggle:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        /* Debate Timeline Styles */
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .timeline-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 40px;
+            width: 2px;
+            height: calc(100% + 1rem);
+            background: #2d3748;
+        }
+        
+        .speaker-avatar {
+            width: 40px;
+            height: 40px;
+            background: #2d3748;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+        
+        .discussion-content {
+            flex: 1;
+            background: #2d3748;
+            border-radius: 12px;
+            padding: 1rem;
+            min-width: 0;  /* Allow flex item to shrink */
+            overflow: hidden;  /* Prevent overflow */
+        }
+        
+        .speaker-name {
+            font-weight: 600;
+            color: #60a5fa;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .speaker-message {
+            color: #e1e8ed;
+            line-height: 1.5;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+        
+        .debate-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        
+        .concern-badge, .critical-badge {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+        
+        .question-badge {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+        
+        .agreement-badge, .consensus-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+        
+        .info-badge, .normal-badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+        
+        .high-badge {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="patient-header">
+            <div class="header-content">
+                <div>
+                    <h1 class="page-title">Your Health Report Analysis</h1>
+                    <p class="page-subtitle">AI-powered analysis of your medical tests - explained simply</p>
+                </div>
+                <a href="/" class="back-button">← Back to Dashboard</a>
+            </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loadingSection" class="loading">
+            <div class="loading-spinner"></div>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="tab-navigation" id="tabNavigation" style="display: none;">
+            <button class="tab-button active" onclick="switchTab('overview')">
+                <i class="fas fa-chart-line"></i> Overview
+            </button>
+            <button class="tab-button" onclick="switchTab('report')">
+                <i class="fas fa-file-medical"></i> Report
+            </button>
+            <button class="tab-button" id="debateTabButton" onclick="switchTab('debate')" style="display: none;">
+                <i class="fas fa-comments"></i> Medical Team Discussion
+            </button>
+        </div>
+        
+        <!-- Overview Tab Content -->
+        <div id="overviewTab" class="tab-content active">
+            <!-- Alert Section -->
+            <div id="alertSection" style="display: none;">
+                <div id="alertCard" class="alert-card">
+                    <div class="alert-header">
+                        <div class="alert-icon">🚨</div>
+                        <h2 id="alertTitle" class="alert-title"></h2>
+                    </div>
+                    <div class="alert-content">
+                        <div id="alertReasons"></div>
+                        <div id="personalizedWarnings" style="display: none;">
+                            <h3 style="margin-top: 1rem; margin-bottom: 0.5rem; color: #ffffff;">Watch for these warning signs:</h3>
+                            <div id="warningsList"></div>
+                        </div>
+                        <div style="margin-top: 1.5rem;">
+                            <div id="alertAction" class="status-badge status-critical"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Cards Grid -->
+            <div class="card-grid">
+                <!-- Admission Card -->
+                <div id="admissionCard" class="card" style="display: none;">
+                    <div class="card-header">
+                        <div class="card-icon">🏥</div>
+                        <h3 class="card-title">Hospital Admission</h3>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Expected Stay</div>
+                        <div id="expectedStay" class="metric-value"></div>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 1rem; color: #9ca3af;">Why admission is needed:</h4>
+                        <ul id="admissionReasons" class="styled-list"></ul>
+                    </div>
+                </div>
+                
+                <!-- Cost Card -->
+                <div id="costCard" class="card" style="display: none;">
+                    <div class="card-header">
+                        <div class="card-icon">💰</div>
+                        <h3 class="card-title">Estimated Costs</h3>
+                    </div>
+                    <div id="costBreakdown"></div>
+                    <div class="total-cost">
+                        <div class="cost-item">
+                            <span class="cost-label">Total Estimate</span>
+                            <span class="cost-value">$<span id="totalCost"></span></span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <div class="status-badge status-normal">
+                            With Insurance: $<span id="insuranceCost"></span>
+                        </div>
+                        <p id="insuranceNote" style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Options Section -->
+            <div id="optionsCard" class="card" style="display: none;">
+                <div class="card-header">
+                    <div class="card-icon">🤔</div>
+                    <h3 class="card-title">Your Options</h3>
+                </div>
+                <div style="margin-bottom: 2rem;">
+                    <div class="metric">
+                        <div class="metric-label">Recommended Action</div>
+                        <div id="recommendedAction" class="metric-value" style="font-size: 1.5rem;"></div>
+                        <div id="recommendationStrength" class="metric-detail"></div>
+                    </div>
+                </div>
+                <div id="alternativeOptions" style="margin-bottom: 2rem;"></div>
+                <div>
+                    <h4 style="margin-bottom: 1rem; color: #9ca3af;">Questions to ask your doctor:</h4>
+                    <ul id="questionsForDoctor" class="styled-list"></ul>
+                </div>
+            </div>
+            
+            <!-- Red Flags Section -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="color: #ef4444;">🚨</div>
+                    <h3 class="card-title">Go to ER immediately if you have:</h3>
+                </div>
+                <div id="redFlags"></div>
+            </div>
+        </div>
+        
+        <!-- Report Tab Content -->
+        <div id="reportTab" class="tab-content">
+            <div class="report-section">
+                <div class="report-header">
+                    <div class="report-title">
+                        <i class="fas fa-file-medical"></i>
+                        Your Personalized Health Report
+                    </div>
+                    <button class="copy-button" onclick="copyReport()">
+                        <i class="fas fa-copy"></i> Copy Report
+                    </button>
+                </div>
+                <div class="report-content" id="reportContent">
+                    <!-- Report content will be dynamically generated here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Debate Tab Content -->
+        <div id="debateTab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">💬</div>
+                    <h3 class="card-title">Your Medical Team's Discussion</h3>
+                </div>
+                <p style="color: #9ca3af; margin-bottom: 1.5rem;">
+                    See how our specialists analyzed your case
+                </p>
+                
+                <!-- Agreement Meter -->
+                <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #9ca3af;">Team Agreement Level</span>
+                        <span id="agreementPercentage" style="font-weight: 600;">--%</span>
+                    </div>
+                    <div style="background: #2d3748; border-radius: 8px; height: 24px; position: relative; overflow: hidden;">
+                        <div id="agreementFill" style="background: linear-gradient(90deg, #ef4444 0%, #f59e0b 40%, #10b981 80%); height: 100%; width: 0%; transition: width 0.5s ease;"></div>
+                    </div>
+                    <p id="agreementDescription" style="color: #9ca3af; font-size: 0.875rem; margin-top: 0.5rem;"></p>
+                </div>
+                
+                <!-- Debate Summary -->
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;">
+                    <div style="display: flex; align-items: start; gap: 0.5rem;">
+                        <i class="fas fa-info-circle" style="color: #3b82f6; margin-top: 0.125rem;"></i>
+                        <div>
+                            <strong>What This Means For You:</strong>
+                            <p id="patientTranslation" style="margin-top: 0.5rem; color: #e1e8ed;"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Discussion Timeline -->
+                <div id="discussionTimeline" style="margin-top: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h4 style="color: #ffffff; margin: 0;">Key Discussion Points</h4>
+                        <button id="toggleFullDiscussion" class="copy-button" style="font-size: 0.875rem; padding: 0.5rem 1rem;" onclick="toggleFullDiscussion()">
+                            <i class="fas fa-expand"></i> Show Full Discussion
+                        </button>
+                    </div>
+                    <div id="discussionContent">
+                        <!-- Timeline items will be inserted here -->
+                    </div>
+                    <div id="fullDiscussionContent" style="display: none;">
+                        <!-- Full conversation will be inserted here -->
+                    </div>
+                </div>
+                
+                <!-- Insight Box -->
+                <div style="background: rgba(99, 102, 241, 0.1); border-left: 4px solid #6366f1; padding: 1rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 600; color: #a5b4fc; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-lightbulb"></i>
+                        Why Medical Debates Are Good
+                    </div>
+                    <p style="color: #e1e8ed;">
+                        When doctors discuss your case, it means they're being thorough. Different specialists 
+                        bring different perspectives - this collaborative approach helps ensure nothing is missed 
+                        and you receive the most appropriate care.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mode Toggle to Hospital/Dashboard View -->
+    <a href="#" class="mode-toggle" onclick="goToDashboard(event)">
+        🏥 Hospital View
+    </a>
+    
+    <script>
+        // Store analysis data globally for report generation
+        let currentAnalysisData = null;
+        let currentPatientView = null;
+        
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Update tab buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            if (tabName === 'overview') {
+                document.getElementById('overviewTab').classList.add('active');
+            } else if (tabName === 'report') {
+                document.getElementById('reportTab').classList.add('active');
+                generateReport();
+            } else if (tabName === 'debate') {
+                document.getElementById('debateTab').classList.add('active');
+                displayDebateInfo();
+            }
+        }
+        
+        // Generate comprehensive patient report
+        function generateReport() {
+            if (!currentAnalysisData || !currentPatientView) return;
+            
+            const patient = currentAnalysisData.patient || {};
+            const consensus = currentAnalysisData.consensus || {};
+            const findings = currentAnalysisData.detailed_findings || {};
+            const communication = currentAnalysisData.agent_communication || {};
+            const explanations = currentPatientView.test_results_explanation || {};
+            
+            // Check if we have the personalized narrative
+            if (explanations.personalized_narrative) {
+                // Use the AI-generated comprehensive narrative
+                let reportHTML = `
+                    <div class="report-section-title">
+                        <i class="fas fa-book-medical"></i> Your Complete Health Story
+                    </div>
+                    <div class="report-section-content" style="font-size: 1.1rem; line-height: 1.8;">
+                        ${explanations.personalized_narrative.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>')}
+                    </div>
+                    
+                    <div class="report-section-title" style="margin-top: 2rem;">
+                        <i class="fas fa-clipboard-check"></i> Key Information Summary
+                    </div>
+                `;
+                
+                // Add structured sections after the narrative
+                reportHTML += generateStructuredSections(patient, consensus, findings, explanations, communication);
+                
+                document.getElementById('reportContent').innerHTML = reportHTML;
+            } else {
+                // Fallback to structured report if no narrative available
+                document.getElementById('reportContent').innerHTML = generateStructuredReport(patient, consensus, findings, explanations, communication);
+            }
+        }
+        
+        // Generate structured sections
+        function generateStructuredSections(patient, consensus, findings, explanations, communication) {
+            return `
+                <div class="report-section-content">
+                    <strong>Patient ID:</strong> ${patient.patient_id || 'Unknown'}<br>
+                    <strong>Age:</strong> ${patient.age} years | <strong>Gender:</strong> ${patient.gender}<br>
+                    <strong>Chief Complaint:</strong> ${patient.chief_complaint}<br>
+                    <strong>Primary Diagnosis:</strong> ${consensus.primary_diagnosis}<br>
+                    <strong>Disposition:</strong> ${consensus.disposition || 'To be determined'}
+                </div>
+                
+                <div class="report-section-title">
+                    <i class="fas fa-heartbeat"></i> What Your Tests Showed
+                </div>
+                <div class="report-section-content">
+                    <strong>Blood Tests:</strong><br>
+                    ${explanations.lab_explanation || 'Your blood tests have been analyzed.'}<br><br>
+                    
+                    <strong>Imaging:</strong><br>
+                    ${explanations.imaging_explanation || 'Your imaging has been reviewed.'}
+                </div>
+                
+                <div class="report-section-title">
+                    <i class="fas fa-user-md"></i> Your Treatment Plan
+                </div>
+                <div class="report-section-content">
+                    ${explanations.treatment_rationale || 'Your treatment plan has been determined.'}
+                </div>
+                
+                <div class="report-section-title">
+                    <i class="fas fa-calendar-check"></i> What to Expect
+                </div>
+                <div class="report-section-content">
+                    ${explanations.what_to_expect || 'Recovery timeline will vary based on your response to treatment.'}
+                </div>
+                
+                <div class="report-section-title">
+                    <i class="fas fa-shield-alt"></i> Important Safety Information
+                </div>
+                <div class="report-section-content">
+                    ${currentPatientView.options?.red_flags?.map(flag => 
+                        `<div style="background: rgba(239, 68, 68, 0.1); padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem;">
+                            <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i> ${flag}
+                        </div>`
+                    ).join('') || 'Monitor your symptoms and contact us if they worsen.'}
+                </div>
+                
+                <div class="report-section-title">
+                    <i class="fas fa-comments"></i> Medical Team Communication
+                </div>
+                <div class="report-section-content">
+                    ${explanations.consensus_note || 'Your medical team has reviewed your case.'}<br><br>
+                    <small style="color: #6b7280;">
+                        Team Analysis: ${communication.total_messages || 0} messages exchanged | 
+                        ${communication.critical_alerts || 0} critical findings | 
+                        Consensus: ${consensus.confidence_level || 'Agreement reached'}
+                    </small>
+                </div>
+            `;
+        }
+        
+        // Generate structured report (fallback)
+        function generateStructuredReport(patient, consensus, findings, explanations, communication) {
+            let reportHTML = `
+                <div class="report-section-title">
+                    <i class="fas fa-user"></i> Patient Information
+                </div>
+                <div class="report-section-content">
+                    <strong>Patient ID:</strong> ${patient.patient_id || 'Unknown'}<br>
+                    <strong>Age:</strong> ${patient.age} years<br>
+                    <strong>Gender:</strong> ${patient.gender}<br>
+                    <strong>Chief Complaint:</strong> ${patient.chief_complaint}<br>
+                    <strong>Diagnosis:</strong> ${consensus.primary_diagnosis}
+                </div>
+                
+                <div class="report-section-title">
+                    <i class="fas fa-stethoscope"></i> Medical Summary
+                </div>
+                <div class="report-section-content">
+                    ${explanations.summary || 
+                      `Based on your test results and ${patient.chief_complaint}, our medical team has determined you have ${consensus.primary_diagnosis}.`}
+                </div>
+            `;
+            
+            // Add all the detailed sections
+            reportHTML += generateStructuredSections(patient, consensus, findings, explanations, communication);
+            
+            // Add reassurance at the end
+            reportHTML += `
+                <div class="report-section-title">
+                    <i class="fas fa-heart"></i> Important Reminders
+                </div>
+                <div class="report-section-content">
+                    ${explanations.reassurance || 
+                      'Follow your treatment plan and contact us if you have any concerns. We\'re here to help you get better.'}
+                </div>
+            `;
+            
+            return reportHTML;
+        }
+        
+        // Copy report to clipboard
+        function copyReport() {
+            const reportContent = document.getElementById('reportContent').innerText;
+            navigator.clipboard.writeText(reportContent).then(() => {
+                const btn = document.querySelector('.copy-button');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 2000);
+            });
+        }
+        
+        // Get stored analysis data or test data
+        async function loadPatientView() {
+            try {
+                // Get analysis results from sessionStorage or create test data
+                let analysisData = sessionStorage.getItem('analysisResults');
+                if (analysisData) {
+                    analysisData = JSON.parse(analysisData);
+                } else {
+                    // Use test data
+                    analysisData = {
+                        patient: { patient_id: 'TEST001', age: 65, chief_complaint: 'Chest pain' },
+                        consensus: { primary_diagnosis: 'Pneumonia', disposition: 'Admit' },
+                        detailed_findings: { risk: { overall_risk: 'HIGH' } }
+                    };
+                }
+                
+                // Store for report generation
+                currentAnalysisData = analysisData;
+                
+                // Call patient view endpoint
+                const response = await fetch('/patient_view', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(analysisData)
+                });
+                
+                const patientView = await response.json();
+                currentPatientView = patientView;
+                displayPatientResults(patientView);
+                
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                document.getElementById('loadingSection').style.display = 'none';
+                document.getElementById('tabNavigation').style.display = 'flex';
+            }
+        }
+        
+        function displayPatientResults(patientView) {
+            // Display alert if needed
+            if (patientView.alert && patientView.alert.show_alert) {
+                const alertSection = document.getElementById('alertSection');
+                alertSection.style.display = 'block';
+                
+                const alertCard = document.getElementById('alertCard');
+                alertCard.className = `alert-card ${patientView.alert.severity}`;
+                
+                document.getElementById('alertTitle').textContent = patientView.alert.title;
+                
+                const reasonsDiv = document.getElementById('alertReasons');
+                reasonsDiv.innerHTML = patientView.alert.urgency_reasons
+                    .map(reason => `<div class="alert-reason">${highlightValues(reason)}</div>`)
+                    .join('');
+                
+                // Display personalized warnings
+                if (patientView.alert.personalized_warnings && patientView.alert.personalized_warnings.length > 0) {
+                    document.getElementById('personalizedWarnings').style.display = 'block';
+                    const warningsList = document.getElementById('warningsList');
+                    warningsList.innerHTML = patientView.alert.personalized_warnings
+                        .map(warning => `<div class="red-flag-item"><span class="red-flag-icon">⚠️</span>${warning}</div>`)
+                        .join('');
+                }
+                
+                document.getElementById('alertAction').textContent = patientView.alert.action_required;
+            }
+            
+            // Display admission info with WHY reasons
+            if (patientView.admission && patientView.admission.needs_admission) {
+                document.getElementById('admissionCard').style.display = 'block';
+                document.getElementById('expectedStay').textContent = patientView.admission.expected_stay;
+                
+                // Show WHY admission is needed
+                const reasonsHTML = patientView.admission.reasons
+                    .map(reason => `<li><span class="list-icon">•</span><span>${reason}</span></li>`)
+                    .join('');
+                document.getElementById('admissionReasons').innerHTML = reasonsHTML;
+                
+                // Add "Why not home care?" section if available
+                if (patientView.admission.why_not_home && patientView.admission.why_not_home.length > 0) {
+                    const whyNotHomeSection = `
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #374151;">
+                            <h4 style="margin-bottom: 1rem; color: #f59e0b;">Why not home care?</h4>
+                            <ul class="styled-list">
+                                ${patientView.admission.why_not_home.map(reason => 
+                                    `<li><span class="list-icon">⚠️</span><span>${reason}</span></li>`
+                                ).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    document.getElementById('admissionCard').insertAdjacentHTML('beforeend', whyNotHomeSection);
+                }
+                
+                // Add daily plan if available
+                if (patientView.admission.daily_plan) {
+                    const dailyPlanHTML = `
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #374151;">
+                            <h4 style="margin-bottom: 1rem; color: #10b981;">Your Hospital Stay Plan</h4>
+                            ${Object.entries(patientView.admission.daily_plan).map(([day, activities]) => `
+                                <div style="margin-bottom: 1rem;">
+                                    <strong style="color: #60a5fa;">${day}:</strong>
+                                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                                        ${activities.map(activity => `<li style="color: #9ca3af;">${activity}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    document.getElementById('admissionCard').insertAdjacentHTML('beforeend', dailyPlanHTML);
+                }
+                
+                // Add what to bring if available
+                if (patientView.admission.what_to_bring && patientView.admission.what_to_bring.length > 0) {
+                    const whatToBringHTML = `
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #374151;">
+                            <h4 style="margin-bottom: 1rem; color: #3b82f6;">What to Bring to the Hospital</h4>
+                            <ul class="styled-list">
+                                ${patientView.admission.what_to_bring.map(item => 
+                                    `<li><span class="list-icon">✓</span><span>${item}</span></li>`
+                                ).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    document.getElementById('admissionCard').insertAdjacentHTML('beforeend', whatToBringHTML);
+                }
+            }
+            
+            // Display cost info
+            if (patientView.cost && patientView.cost.total_estimated > 0) {
+                document.getElementById('costCard').style.display = 'block';
+                
+                const breakdownDiv = document.getElementById('costBreakdown');
+                if (patientView.cost.breakdown) {
+                    breakdownDiv.innerHTML = Object.entries(patientView.cost.breakdown)
+                        .map(([item, cost]) => `
+                            <div class="cost-item">
+                                <span class="cost-label">${item}</span>
+                                <span class="cost-value">${cost.toLocaleString()}</span>
+                            </div>
+                        `).join('');
+                }
+                
+                document.getElementById('totalCost').textContent = patientView.cost.total_estimated.toLocaleString();
+                document.getElementById('insuranceCost').textContent = 
+                    patientView.cost.insurance_estimate?.with_insurance?.toLocaleString() || 'N/A';
+                document.getElementById('insuranceNote').textContent = 
+                    patientView.cost.insurance_estimate?.coverage_note || '';
+                
+                // Add "Why these costs?" explanation if available
+                if (patientView.cost.why_costs) {
+                    const whyCostsSection = `
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #374151;">
+                            <h4 style="margin-bottom: 1rem; color: #9ca3af;">Why these costs?</h4>
+                            <p style="color: #6b7280; line-height: 1.5;">${patientView.cost.why_costs}</p>
+                        </div>
+                    `;
+                    document.getElementById('costCard').insertAdjacentHTML('beforeend', whyCostsSection);
+                }
+            }
+            
+            // Display options
+            if (patientView.options) {
+                document.getElementById('optionsCard').style.display = 'block';
+                document.getElementById('recommendedAction').textContent = patientView.options.recommended_action;
+                document.getElementById('recommendationStrength').textContent = patientView.options.recommendation_strength;
+                
+                const alternativesDiv = document.getElementById('alternativeOptions');
+                if (patientView.options.alternatives) {
+                    alternativesDiv.innerHTML = patientView.options.alternatives
+                        .map(alt => `
+                            <div class="option-card ${alt.suitable ? 'option-suitable' : 'option-not-suitable'}">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                                    ${alt.suitable ? '✓' : '✗'} ${alt.option}
+                                </div>
+                                <p style="color: #9ca3af; font-size: 0.875rem;">${alt.reason}</p>
+                            </div>
+                        `).join('');
+                }
+                
+                if (patientView.options.questions_for_doctor) {
+                    document.getElementById('questionsForDoctor').innerHTML = patientView.options.questions_for_doctor
+                        .map(q => `<li><span class="list-icon">•</span><span>${q}</span></li>`)
+                        .join('');
+                }
+                
+                // Display red flags
+                if (patientView.options.red_flags && patientView.options.red_flags.length > 0) {
+                    document.getElementById('redFlags').innerHTML = patientView.options.red_flags
+                        .map(flag => `
+                            <div class="red-flag-item">
+                                <span class="red-flag-icon">⚠️</span>
+                                <span>${highlightValues(flag)}</span>
+                            </div>
+                        `).join('');
+                }
+            }
+            
+            // Show debate tab if significant discussion occurred
+            if (patientView.show_debate_tab || patientView.medical_team_discussion?.show_debate_tab) {
+                document.getElementById('debateTabButton').style.display = 'inline-flex';
+            }
+        }
+        
+        function highlightValues(text) {
+            return text.replace(/(\d+\.?\d*%?)/g, '<span class="value-highlight">$1</span>');
+        }
+        
+        // Store full conversation globally
+        let fullConversationData = null;
+        let showingFullDiscussion = false;
+        
+        // Toggle between summary and full discussion
+        function toggleFullDiscussion() {
+            showingFullDiscussion = !showingFullDiscussion;
+            const btn = document.getElementById('toggleFullDiscussion');
+            const summaryContent = document.getElementById('discussionContent');
+            const fullContent = document.getElementById('fullDiscussionContent');
+            
+            if (showingFullDiscussion) {
+                btn.innerHTML = '<i class="fas fa-compress"></i> Show Summary';
+                summaryContent.style.display = 'none';
+                fullContent.style.display = 'block';
+                displayFullConversation();
+            } else {
+                btn.innerHTML = '<i class="fas fa-expand"></i> Show Full Discussion';
+                summaryContent.style.display = 'block';
+                fullContent.style.display = 'none';
+            }
+        }
+        
+        // Display full conversation log
+        function displayFullConversation() {
+            const fullContent = document.getElementById('fullDiscussionContent');
+            
+            if (!fullConversationData || fullConversationData.length === 0) {
+                fullContent.innerHTML = '<p style="color: #9ca3af;">Full conversation data not available.</p>';
+                return;
+            }
+            
+            const conversationHTML = fullConversationData.map((msg, index) => {
+                const typeLabel = msg.type.charAt(0).toUpperCase() + msg.type.slice(1);
+                const priorityClass = msg.priority === 1 ? 'critical' : msg.priority === 2 ? 'high' : 'normal';
+                const typeIcon = msg.type === 'question' ? '❓' : 
+                               msg.type === 'alert' ? '🚨' : 
+                               msg.type === 'consensus' ? '🤝' : 
+                               msg.type === 'finding' ? '🔬' : '💬';
+                
+                return `
+                    <div class="timeline-item" style="margin-bottom: 1rem;">
+                        <div class="speaker-avatar">${typeIcon}</div>
+                        <div class="discussion-content">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <div class="speaker-name">${msg.agent}</div>
+                                    <div class="speaker-message">${msg.content}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span class="debate-badge ${priorityClass}-badge" style="font-size: 0.7rem;">${typeLabel}</span>
+                                    <div style="color: #6b7280; font-size: 0.75rem; margin-top: 0.25rem;">${msg.timestamp}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            fullContent.innerHTML = `
+                <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+                    <p style="color: #60a5fa; font-size: 0.875rem; margin: 0;">
+                        <i class="fas fa-info-circle"></i> Complete transcript of ${fullConversationData.length} messages exchanged between medical specialists
+                    </p>
+                </div>
+                ${conversationHTML}
+            `;
+        }
+        
+        // Display debate information
+        function displayDebateInfo() {
+            if (!currentPatientView || !currentPatientView.medical_team_discussion) return;
+            
+            const debate = currentPatientView.medical_team_discussion;
+            
+            // Store full conversation if available
+            if (debate.full_conversation && debate.full_conversation.length > 0) {
+                fullConversationData = debate.full_conversation;
+                document.getElementById('toggleFullDiscussion').style.display = 'inline-block';
+            } else if (currentAnalysisData && currentAnalysisData.raw_conversation) {
+                fullConversationData = currentAnalysisData.raw_conversation;
+                document.getElementById('toggleFullDiscussion').style.display = 'inline-block';
+            } else {
+                document.getElementById('toggleFullDiscussion').style.display = 'none';
+            }
+            
+            // Update agreement meter
+            const agreementScore = debate.consensus_score || 50;
+            document.getElementById('agreementFill').style.width = `${agreementScore}%`;
+            document.getElementById('agreementPercentage').textContent = `${agreementScore}%`;
+            document.getElementById('agreementDescription').textContent = debate.agreement_level || 'Moderate Agreement';
+            
+            // Update patient translation
+            document.getElementById('patientTranslation').textContent = debate.patient_translation || 
+                'Your medical team reviewed your case and reached a consensus on the best treatment approach.';
+            
+            // Update discussion timeline
+            const summaryContent = document.getElementById('discussionContent');
+            if (debate.example_dialogue && debate.example_dialogue.length > 0) {
+                const timelineHTML = debate.example_dialogue.map(item => `
+                    <div class="timeline-item">
+                        <div class="speaker-avatar">${item.speaker.charAt(4)}</div>
+                        <div class="discussion-content">
+                            <div class="speaker-name">${item.speaker}</div>
+                            <div class="speaker-message">${item.message}</div>
+                            ${item.badge ? `<span class="debate-badge ${item.badge_class}-badge">${item.badge}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                
+                summaryContent.innerHTML = timelineHTML;
+            }
+        }
+        
+        // Function to switch to Dashboard/Hospital view
+        function goToDashboard(event) {
+            event.preventDefault();
+            
+            // Store current analysis data if available
+            const currentData = sessionStorage.getItem('analysisResults');
+            if (currentData) {
+                // Keep the data in session for when we come back
+                sessionStorage.setItem('analysisResults', currentData);
+                sessionStorage.setItem('returnToAnalysis', 'true');
+            }
+            
+            // Navigate to dashboard (root path)
+            window.location.href = '/';
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', loadPatientView);
+    </script>
+</body>
+</html>
