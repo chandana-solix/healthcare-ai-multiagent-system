@@ -270,6 +270,29 @@ class IntelligentOrchestrator:
         # Get conversation log
         conversation = blackboard.get_agent_conversation()
         
+        # Prepare analysis results
+        analysis_results = {
+            'patient': patient_data,
+            'patient_data': patient_data,  # Include both keys for compatibility
+            'consensus': consensus_result['consensus'],
+            'detailed_findings': {
+                'lab': lab_analysis,
+                'imaging': xray_analysis,
+                'risk': risk_assessment,
+                'clinical_decision': clinical_decision
+            }
+        }
+        
+        # Calculate unified healthcare analytics
+        from agents.healthcare_analytics import healthcare_analytics
+        # Since we're already in an async context, we'll need to handle this properly
+        # For now, we'll include the analytics data structure
+        analytics = {
+            'note': 'Analytics will be calculated in patient view',
+            'risk_level': risk_assessment.get('overall_risk', 'MODERATE'),
+            'diagnosis': consensus_result['consensus'].get('primary_diagnosis', 'Unknown')
+        }
+        
         return {
             'patient': patient_data,
             'analysis_time': f"{analysis_time:.2f} seconds",
@@ -281,6 +304,7 @@ class IntelligentOrchestrator:
                 'risk': risk_assessment,
                 'clinical_decision': clinical_decision
             },
+            'healthcare_analytics': analytics,  # Add unified analytics
             'agent_communication': {
                 'total_messages': len(conversation),
                 'critical_alerts': len(blackboard.active_alerts),

@@ -8,10 +8,16 @@ async def generate_ai_patient_view(analysis_results: Dict) -> Dict:
     """
     Generate comprehensive patient view with all features
     """
+    # Import healthcare analytics for unified cost calculation
+    from agents.healthcare_analytics import healthcare_analytics
+    
     # Extract data
     consensus = analysis_results.get('consensus', {})
     patient_data = analysis_results.get('patient_data') or analysis_results.get('patient', {})
     detailed_findings = analysis_results.get('detailed_findings', {})
+    
+    # Get unified analytics
+    analytics = await healthcare_analytics.analyze_case(analysis_results)
     
     # Get key information
     diagnosis = consensus.get('primary_diagnosis', 'Unknown condition')
@@ -50,11 +56,11 @@ async def generate_ai_patient_view(analysis_results: Dict) -> Dict:
     alert_data['urgency_reasons'].append(f"Diagnosis: {diagnosis}")
     alert_data['urgency_reasons'].extend(key_interventions[:2])
     
-    # Generate admission information
+    # Generate admission information using analytics data
     admission_data = {
         "needs_admission": is_admission or is_icu,
         "admission_type": "ICU" if is_icu else "Hospital Ward" if is_admission else "Outpatient",
-        "expected_stay": "5-7 days" if is_icu else "3-5 days" if is_admission else "No admission needed",
+        "expected_stay": f"{analytics['predicted_length_of_stay']} days" if is_admission or is_icu else "No admission needed",
         "reasons": [],
         "what_to_expect": [],
         "daily_plan": {}
@@ -83,27 +89,18 @@ async def generate_ai_patient_view(analysis_results: Dict) -> Dict:
             "Day 4+": ["Evaluate for discharge", "Transition to oral medications if improving"]
         }
     
-    # Generate cost estimates
-    base_cost = 20000 if is_icu else 12000 if is_admission else 2500
+    # Use analytics data for cost estimates
     cost_data = {
-        "total_estimated": base_cost,
-        "breakdown": {
-            "Room and nursing care": base_cost * 0.4,
-            "Medications": base_cost * 0.2,
-            "Laboratory tests": base_cost * 0.15,
-            "Imaging studies": base_cost * 0.15,
-            "Physician services": base_cost * 0.1
-        },
-        "insurance_estimate": {
-            "with_insurance": base_cost * 0.2,  # Assuming 80% coverage
-            "deductible_info": "Subject to your plan's deductible",
-            "coverage_note": "Most insurance plans cover 70-80% after deductible"
-        },
+        "total_estimated": analytics['estimated_total_cost'],
+        "breakdown": analytics['cost_breakdown'],
+        "insurance_estimate": analytics['insurance_estimate'],
         "financial_options": [
             "Payment plans available",
             "Financial assistance programs may apply",
             "Discuss with billing department"
-        ]
+        ],
+        "length_of_stay": analytics['predicted_length_of_stay'],
+        "daily_rate": analytics['daily_rate']
     }
     
     # Generate treatment options
