@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # FastAPI imports
-from fastapi import FastAPI, UploadFile, File, Request, WebSocket, WebSocketDisconnect, Query, Body
+from fastapi import FastAPI, UploadFile, File, Request, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -353,26 +353,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Initialize orchestrator
 orchestrator = IntelligentOrchestrator()
 
-# WebSocket manager
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: List[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            try:
-                await connection.send_text(message)
-            except:
-                pass
-
-manager = ConnectionManager()
 
 @app.get("/")
 async def root():
@@ -482,31 +462,6 @@ async def analyze_patient(
         traceback.print_exc()
         return {"error": str(e)}
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    """
-    WebSocket for real-time agent communication
-    """
-    await manager.connect(websocket)
-    
-    # Subscribe to blackboard events
-    async def send_update(topic: str, message: Dict):
-        await websocket.send_json({
-            'type': 'agent_message',
-            'agent': message.get('agent_id'),
-            'topic': topic,
-            'content': message.get('content'),
-            'timestamp': message.get('timestamp')
-        })
-    
-    blackboard.subscribe("WebSocket", ["*"], send_update)
-    
-    try:
-        while True:
-            # Keep connection alive
-            await websocket.receive_text()
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
 
 @app.get("/health")
 async def health_check():
