@@ -807,16 +807,6 @@
         let analysisResults = null;
         
         // Setup WebSocket
-        function setupWebSocket() {
-            // ws = new WebSocket('ws://localhost:8000/ws');
-            
-            ws.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-                if (data.type === 'agent_message') {
-                    addAgentMessage(data);
-                }
-            };
-        }
         
         function addAgentMessage(data) {
             const messagesDiv = document.getElementById('agentMessages');
@@ -887,8 +877,6 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
             document.getElementById('agentMessages').innerHTML = '';
             
-            if (!ws || ws.readyState !== WebSocket.OPEN) {
-                // setupWebSocket();
             }
             
             const formData = new FormData();
@@ -1508,7 +1496,6 @@ AGENT COMMUNICATION: ${data.agent_communication.total_messages} messages exchang
         
         // Initialize
         window.addEventListener('load', () => {
-            // setupWebSocket();
             
             // Check if returning from patient view with analysis data
             const returnToAnalysis = sessionStorage.getItem('returnToAnalysis');
