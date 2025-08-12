@@ -808,7 +808,7 @@
         
         // Setup WebSocket
         function setupWebSocket() {
-            ws = new WebSocket('ws://localhost:8000/ws');
+            // ws = new WebSocket('ws://localhost:8000/ws');
             
             ws.onmessage = function(event) {
                 const data = JSON.parse(event.data);
@@ -888,7 +888,7 @@
             document.getElementById('agentMessages').innerHTML = '';
             
             if (!ws || ws.readyState !== WebSocket.OPEN) {
-                setupWebSocket();
+                // setupWebSocket();
             }
             
             const formData = new FormData();
@@ -1508,7 +1508,7 @@ AGENT COMMUNICATION: ${data.agent_communication.total_messages} messages exchang
         
         // Initialize
         window.addEventListener('load', () => {
-            setupWebSocket();
+            // setupWebSocket();
             
             // Check if returning from patient view with analysis data
             const returnToAnalysis = sessionStorage.getItem('returnToAnalysis');
