@@ -354,6 +354,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 orchestrator = IntelligentOrchestrator()
 
 
+@app.get("/upload_test")
+async def upload_test():
+    return FileResponse('upload_test.html')
+
 @app.get("/")
 async def root():
     return FileResponse('static/dashboard.html')

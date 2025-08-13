@@ -559,9 +559,9 @@
                     <div id="xray-status" style="margin-top: 0.5rem; color: #4ade80;"></div>
                 </div>
             </div>
-            <input type="file" id="demographics" accept=".json" style="display: none;">
-            <input type="file" id="lab" accept="image/*" style="display: none;">
-            <input type="file" id="xray" accept="image/*" style="display: none;">
+            <input type="file" id="demographics" accept=".json" style="display: none;" onchange="handleFileChange(event, 'demographics')">
+            <input type="file" id="lab" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'lab')">
+            <input type="file" id="xray" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'xray')">
             <button class="analyze-button" onclick="analyzePatient()" disabled>
                 🤖 Start AI Multi-Agent Analysis
             </button>
@@ -806,7 +806,7 @@
         let ws = null;
         let analysisResults = null;
         
-        // Setup WebSocket
+        // WebSocket removed for deployment
         
         function addAgentMessage(data) {
             const messagesDiv = document.getElementById('agentMessages');
@@ -835,36 +835,36 @@
             return `<strong>${data.topic}:</strong> ${data.content}`;
         }
         
-        // File upload handlers
-        document.getElementById('demographics').addEventListener('change', function(e) {
-            const file = e.target.files[0];
+        // File upload handler
+        function handleFileChange(event, type) {
+            const file = event.target.files[0];
             if (file) {
-                uploadedFiles.demographics = file;
-                document.getElementById('demo-status').textContent = `✅ ${file.name}`;
-                document.querySelector('.upload-box').classList.add('uploaded');
+                uploadedFiles[type] = file;
+                
+                // Update status
+                let statusId = '';
+                let boxIndex = 0;
+                
+                switch(type) {
+                    case 'demographics':
+                        statusId = 'demo-status';
+                        boxIndex = 0;
+                        break;
+                    case 'lab':
+                        statusId = 'lab-status';
+                        boxIndex = 1;
+                        break;
+                    case 'xray':
+                        statusId = 'xray-status';
+                        boxIndex = 2;
+                        break;
+                }
+                
+                document.getElementById(statusId).textContent = `✅ ${file.name}`;
+                document.querySelectorAll('.upload-box')[boxIndex].classList.add('uploaded');
                 checkReadyToAnalyze();
             }
-        });
-        
-        document.getElementById('lab').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                uploadedFiles.lab = file;
-                document.getElementById('lab-status').textContent = `✅ ${file.name}`;
-                document.querySelectorAll('.upload-box')[1].classList.add('uploaded');
-                checkReadyToAnalyze();
-            }
-        });
-        
-        document.getElementById('xray').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                uploadedFiles.xray = file;
-                document.getElementById('xray-status').textContent = `✅ ${file.name}`;
-                document.querySelectorAll('.upload-box')[2].classList.add('uploaded');
-                checkReadyToAnalyze();
-            }
-        });
+        }
         
         function checkReadyToAnalyze() {
             const btn = document.querySelector('.analyze-button');
@@ -877,7 +877,7 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
             document.getElementById('agentMessages').innerHTML = '';
             
-            }
+            // WebSocket removed for deployment
             
             const formData = new FormData();
             formData.append('demographics', uploadedFiles.demographics);
